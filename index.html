@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reserva de Números</title>
+<style>
+*{box-sizing:border-box} body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
+.wrap{max-width:1100px;margin:auto;padding:20px} h1{text-align:center;margin-bottom:6px}
+.sub{text-align:center;color:#666;margin-bottom:22px}
+.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;font-size:14px}
+.dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:7px}
+.num{border:1px solid #ccc;border-radius:8px;padding:12px 4px;text-align:center;font-weight:bold;background:white;cursor:pointer}
+.num:hover{transform:translateY(-1px)} .reservado{background:#ddd;color:#777;cursor:not-allowed}
+.selecionado{background:#222;color:white;border-color:#222}
+.panel{position:sticky;bottom:0;background:white;border-top:1px solid #ddd;margin-top:20px;padding:15px;box-shadow:0 -4px 16px #0001}
+.form{display:grid;grid-template-columns:2fr 1.4fr 1.4fr auto;gap:8px;max-width:900px;margin:auto}
+input,button{padding:12px;border-radius:8px;border:1px solid #bbb;font-size:15px}
+button{background:#111;color:white;border:0;font-weight:bold;cursor:pointer} button:disabled{opacity:.5}
+.msg{text-align:center;margin-top:9px;font-weight:bold}
+@media(max-width:700px){.form{grid-template-columns:1fr} .grid{grid-template-columns:repeat(5,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Escolha seu número</h1>
+<div class="sub">Números de 001 a 999</div>
+<div class="legend"><span><i class="dot" style="background:white;border:1px solid #aaa"></i>Disponível</span><span><i class="dot" style="background:#ddd"></i>Reservado</span><span><i class="dot" style="background:#222"></i>Selecionado</span></div>
+<div id="grid" class="grid">Carregando números...</div>
+</div>
+<div class="panel">
+<div class="form">
+<input id="nome" placeholder="Seu nome">
+<input id="telefone" inputmode="numeric" placeholder="WhatsApp">
+<input id="cpf" inputmode="numeric" placeholder="CPF">
+<button id="reservar" disabled>Reservar número</button>
+</div>
+<div id="msg" class="msg">Selecione um número disponível.</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const { createClient } = supabase;
+const db = createClient("https://sjvzuoflqfyfbnyraymy.supabase.co", "sb_publishable_GgzTsAlQtOLRYiBKItXSCA_QBIEA8TW");
+let selecionado = null;
+const grid = document.getElementById("grid");
+const msg = document.getElementById("msg");
+const botao = document.getElementById("reservar");
+
+function somenteDigitos(v){ return v.replace(/\D/g,""); }
+
+async function carregar(){
+  const { data, error } = await db.from("numeros_publicos").select("numero,status").order("numero");
+  if(error){ grid.innerHTML="Não foi possível carregar os números."; console.error(error); return; }
+  grid.innerHTML="";
+  data.forEach(item=>{
+    const el=document.createElement("button");
+    el.className="num";
+    el.textContent=item.numero;
+    const disponivel=item.status==="disponivel";
+    if(!disponivel){ el.classList.add("reservado"); el.disabled=true; }
+    el.onclick=()=>{
+      document.querySelectorAll(".selecionado").forEach(x=>x.classList.remove("selecionado"));
+      selecionado=item.numero; el.classList.add("selecionado"); botao.disabled=false;
+      msg.textContent="Número "+item.numero+" selecionado.";
+    };
+    grid.appendChild(el);
+  });
+}
+
+botao.onclick=async()=>{
+  const nome=document.getElementById("nome").value.trim();
+  const telefone=somenteDigitos(document.getElementById("telefone").value);
+  const cpf=somenteDigitos(document.getElementById("cpf").value);
+  if(!selecionado || !nome || !telefone || !cpf){ msg.textContent="Preencha nome, WhatsApp e CPF."; return; }
+  botao.disabled=true; msg.textContent="Reservando...";
+  const { data, error } = await db.rpc("reservar_numero", {
+    p_numero: selecionado, p_nome: nome, p_telefone: telefone, p_cpf: cpf
+  });
+  if(error){ console.error(error); msg.textContent="Não foi possível concluir. Tente novamente."; botao.disabled=false; return; }
+  if(data===true){ msg.textContent="Número "+selecionado+" reservado com sucesso!"; selecionado=null; await carregar(); }
+  else{ msg.textContent="Esse número acabou de ser reservado por outra pessoa. Escolha outro."; selecionado=null; await carregar(); }
+};
+
+carregar();
+</script>
+</body>
+</html>
