@@ -3,153 +3,139 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Reserva de Números</title>
+<title>F-1000 - Reserva de Números</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f5f5f5;color:#222}
-.wrap{max-width:1100px;margin:auto;padding:20px}
-h1{text-align:center;margin-bottom:6px}
-.sub{text-align:center;color:#666;margin-bottom:18px}
-.legend{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:18px;font-size:14px}
-.dot{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(62px,1fr));gap:7px}
-.num{border:1px solid #ccc;border-radius:8px;padding:12px 4px;text-align:center;font-weight:bold;background:#fff;color:#000 !important;cursor:pointer}
-.num:hover{transform:translateY(-1px)}
-.num.reservado{background:#ddd;color:#777 !important;cursor:not-allowed}
-.num.selecionado{background:#222;color:#fff !important;border-color:#222}
-.panel{position:sticky;bottom:0;background:#fff;border-top:1px solid #ddd;margin-top:20px;padding:15px;box-shadow:0 -4px 16px #0001}
-.form{display:grid;grid-template-columns:2fr 1.4fr 1.4fr auto;gap:8px;max-width:900px;margin:auto}
+.wrap{max-width:1100px;margin:auto;padding:16px}
+h1{text-align:center;margin:4px 0}
+.premio{text-align:center;font-weight:bold;font-size:18px;margin:8px 0}
+.preco{text-align:center;font-size:20px;font-weight:bold;margin:10px 0 14px}
+.legend{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:16px;font-size:14px}
+.dot{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:5px;border:1px solid #aaa}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:7px}
+.num{border:1px solid #bbb;border-radius:8px;padding:11px 3px;text-align:center;font-weight:bold;background:#fff;color:#000!important;cursor:pointer}
+.num.selecionado{background:#222;color:#fff!important;border-color:#222}
+.num.reservado{background:#ffd966;color:#222!important;cursor:not-allowed}
+.num.confirmado{background:#7fcf82;color:#111!important;cursor:not-allowed}
+.panel{position:sticky;bottom:0;background:#fff;border-top:1px solid #ddd;margin-top:18px;padding:12px;box-shadow:0 -4px 16px #0002}
+.resumo{text-align:center;margin-bottom:10px;line-height:1.5}
+.total{font-size:22px;font-weight:bold}
+.form{display:grid;grid-template-columns:2fr 1.4fr 1.4fr auto;gap:8px;max-width:950px;margin:auto}
 input,button{padding:12px;border-radius:8px;border:1px solid #bbb;font-size:15px}
 #reservar{background:#111;color:#fff;border:0;font-weight:bold;cursor:pointer}
 #reservar:disabled{opacity:.5;cursor:not-allowed}
-.msg{text-align:center;margin-top:9px;font-weight:bold}
-@media(max-width:700px){.form{grid-template-columns:1fr}.grid{grid-template-columns:repeat(5,1fr)}}
+.msg{text-align:center;margin-top:8px;font-weight:bold}
+@media(max-width:700px){
+ .grid{grid-template-columns:repeat(5,1fr);gap:6px}
+ .num{padding:10px 2px}
+ .form{grid-template-columns:1fr}
+ .wrap{padding:10px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-<h1>Escolha seu número</h1>
-<div class="sub">Números de 001 a 999</div>
+<h1>Ford F-1000</h1>
+<div class="premio">Prêmio: 1 Caminhonete Ford F-1000</div>
+<div class="preco">R$ 100,00 por número</div>
 <div class="legend">
-<span><i class="dot" style="background:white;border:1px solid #aaa"></i>Disponível</span>
-<span><i class="dot" style="background:#ddd"></i>Reservado</span>
-<span><i class="dot" style="background:#222"></i>Selecionado</span>
+<span><i class="dot" style="background:#fff"></i>Disponível</span>
+<span><i class="dot" style="background:#ffd966"></i>Reservado</span>
+<span><i class="dot" style="background:#7fcf82"></i>Confirmado</span>
 </div>
 <div id="grid" class="grid">Carregando números...</div>
 </div>
 
 <div class="panel">
-<div class="form">
-<input id="nome" autocomplete="name" placeholder="Seu nome">
-<input id="telefone" autocomplete="tel" inputmode="tel" placeholder="WhatsApp">
-<input id="cpf" inputmode="numeric" placeholder="CPF">
-<button id="reservar" disabled>Reservar número</button>
+<div class="resumo">
+<div id="selecionados">Nenhum número selecionado</div>
+<div>Quantidade: <strong id="qtd">0</strong> &nbsp;|&nbsp; R$ 100,00 cada</div>
+<div class="total">Total: <span id="total">R$ 0,00</span></div>
 </div>
-<div id="msg" class="msg">Selecione um número disponível.</div>
+<div class="form">
+<input id="nome" placeholder="Seu nome">
+<input id="telefone" inputmode="tel" placeholder="WhatsApp">
+<input id="cpf" inputmode="numeric" placeholder="CPF">
+<button id="reservar" disabled>Reservar números</button>
+</div>
+<div id="msg" class="msg">Escolha um ou mais números disponíveis.</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const { createClient } = supabase;
+const {createClient} = supabase;
 const db = createClient("https://sjvzuoflqfyfbnyravmy.supabase.co", "sb_publishable_GgzTsAlQtOLRYiBKItXSCA_QBIEA8TW");
-let selecionado = null;
+const PRECO = 100;
+let escolhidos = new Set();
 
-const grid = document.getElementById("grid");
-const msg = document.getElementById("msg");
-const botao = document.getElementById("reservar");
-const nomeEl = document.getElementById("nome");
-const telefoneEl = document.getElementById("telefone");
-const cpfEl = document.getElementById("cpf");
+const grid=document.getElementById("grid");
+const msg=document.getElementById("msg");
+const botao=document.getElementById("reservar");
+const qtd=document.getElementById("qtd");
+const total=document.getElementById("total");
+const selecionados=document.getElementById("selecionados");
 
-function somenteDigitos(v) {
-  return String(v || "").replace(/\D/g, "");
+function digits(v){return String(v||"").replace(/\D/g,"")}
+function moeda(v){return v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+
+function atualizarResumo(){
+ const lista=[...escolhidos].sort();
+ qtd.textContent=lista.length;
+ total.textContent=moeda(lista.length*PRECO);
+ selecionados.textContent=lista.length ? "Selecionados: "+lista.join(", ") : "Nenhum número selecionado";
+ botao.disabled=lista.length===0;
+ botao.textContent=lista.length ? `Reservar ${lista.length} número${lista.length>1?"s":""}` : "Reservar números";
 }
 
-async function carregar() {
-  const { data, error } = await db
-    .from("numeros_publicos")
-    .select("numero,status")
-    .order("numero", { ascending: true });
-
-  if (error) {
-    console.error("Erro ao carregar:", error);
-    grid.textContent = "Não foi possível carregar os números.";
-    return;
-  }
-
-  grid.innerHTML = "";
-  data.forEach(item => {
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "num";
-    el.textContent = item.numero;
-
-    if (item.status !== "disponivel") {
-      el.classList.add("reservado");
-      el.disabled = true;
-    } else {
-      el.addEventListener("click", () => {
-        document.querySelectorAll(".num.selecionado")
-          .forEach(x => x.classList.remove("selecionado"));
-        selecionado = item.numero;
-        el.classList.add("selecionado");
-        botao.disabled = false;
-        msg.textContent = "Número " + item.numero + " selecionado.";
-      });
-    }
-    grid.appendChild(el);
-  });
+async function carregar(){
+ const {data,error}=await db.from("numeros_publicos").select("numero,status").order("numero",{ascending:true});
+ if(error){console.error(error);grid.textContent="Não foi possível carregar os números.";return}
+ grid.innerHTML="";
+ data.forEach(item=>{
+   const b=document.createElement("button");
+   b.type="button"; b.className="num"; b.textContent=item.numero;
+   if(item.status==="reservado"){b.classList.add("reservado");b.disabled=true}
+   else if(item.status==="confirmado" || item.status==="pago"){b.classList.add("confirmado");b.disabled=true}
+   else{
+     if(escolhidos.has(item.numero)) b.classList.add("selecionado");
+     b.onclick=()=>{
+       if(escolhidos.has(item.numero)) escolhidos.delete(item.numero);
+       else escolhidos.add(item.numero);
+       b.classList.toggle("selecionado");
+       atualizarResumo();
+     };
+   }
+   grid.appendChild(b);
+ });
 }
 
-botao.addEventListener("click", async () => {
-  const nome = nomeEl.value.trim();
-  const telefone = somenteDigitos(telefoneEl.value);
-  const cpf = somenteDigitos(cpfEl.value);
+botao.onclick=async()=>{
+ const lista=[...escolhidos].sort();
+ const nome=document.getElementById("nome").value.trim();
+ const telefone=digits(document.getElementById("telefone").value);
+ const cpf=digits(document.getElementById("cpf").value);
+ if(!nome||!telefone||!cpf){msg.textContent="Preencha nome, WhatsApp e CPF.";return}
+ botao.disabled=true; msg.textContent="Reservando...";
+ const {data,error}=await db.rpc("reservar_varios_numeros",{
+   p_numeros:lista,p_nome:nome,p_telefone:telefone,p_cpf:cpf
+ });
+ if(error){console.error(error);msg.textContent="Não foi possível concluir. Tente novamente.";botao.disabled=false;return}
+ if(data===true){
+   msg.textContent=`${lista.length} número${lista.length>1?"s":""} reservado${lista.length>1?"s":""} com sucesso!`;
+   escolhidos.clear();
+   document.getElementById("nome").value="";
+   document.getElementById("telefone").value="";
+   document.getElementById("cpf").value="";
+   atualizarResumo(); await carregar();
+ } else {
+   msg.textContent="Um dos números acabou de ser reservado. Confira a grade e escolha novamente.";
+   escolhidos.clear(); atualizarResumo(); await carregar();
+ }
+}
 
-  if (!selecionado) {
-    msg.textContent = "Escolha um número.";
-    return;
-  }
-  if (!nome || !telefone || !cpf) {
-    msg.textContent = "Preencha nome, WhatsApp e CPF.";
-    return;
-  }
-
-  botao.disabled = true;
-  msg.textContent = "Reservando...";
-
-  const numeroTentado = selecionado;
-
-  const { data, error } = await db.rpc("reservar_numero", {
-    p_numero: numeroTentado,
-    p_nome: nome,
-    p_telefone: telefone,
-    p_cpf: cpf
-  });
-
-  if (error) {
-    console.error("Erro na reserva:", error);
-    msg.textContent = "Não foi possível concluir a reserva. Tente novamente.";
-    botao.disabled = false;
-    return;
-  }
-
-  if (data === true) {
-    msg.textContent = "Seu número " + numeroTentado + " foi reservado com sucesso!";
-    selecionado = null;
-    nomeEl.value = "";
-    telefoneEl.value = "";
-    cpfEl.value = "";
-    await carregar();
-  } else {
-    msg.textContent = "Esse número acabou de ser reservado. Escolha outro.";
-    selecionado = null;
-    await carregar();
-  }
-});
-
+atualizarResumo();
 carregar();
 </script>
 </body>
 </html>
-  
