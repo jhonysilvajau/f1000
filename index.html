@@ -26,6 +26,16 @@ input,button{padding:12px;border-radius:8px;border:1px solid #bbb;font-size:15px
 #reservar{background:#111;color:#fff;border:0;font-weight:bold;cursor:pointer}
 #reservar:disabled{opacity:.5;cursor:not-allowed}
 .msg{text-align:center;margin-top:8px;font-weight:bold}
+.msg.sucesso{
+  max-width:900px;
+  margin:12px auto 0;
+  padding:14px;
+  background:#e8f7e8;
+  color:#087a20;
+  border:2px solid #28a745;
+  border-radius:10px;
+  line-height:1.5;
+}
 @media(max-width:700px){
  .grid{grid-template-columns:repeat(5,1fr);gap:6px}
  .num{padding:10px 2px}
@@ -116,13 +126,14 @@ botao.onclick=async()=>{
  const nome=document.getElementById("nome").value.trim();
  const telefone=digits(document.getElementById("telefone").value);
  const cpf=digits(document.getElementById("cpf").value);
- if(!nome||!telefone||!cpf){msg.textContent="Preencha nome, WhatsApp e CPF.";return}
- botao.disabled=true; msg.textContent="Reservando...";
+ if(!nome||!telefone||!cpf){msg.classList.remove("sucesso");msg.textContent="Preencha nome, WhatsApp e CPF.";return}
+ botao.disabled=true; msg.classList.remove("sucesso"); msg.textContent="Reservando...";
  const {data,error}=await db.rpc("reservar_varios_numeros",{
    p_numeros:lista,p_nome:nome,p_telefone:telefone,p_cpf:cpf
  });
  if(error){console.error(error);msg.textContent="Não foi possível concluir. Tente novamente.";botao.disabled=false;return}
  if(data===true){
+   msg.classList.add("sucesso");
    msg.innerHTML="<strong>Reserva realizada com sucesso!</strong><br>Agradecemos sua reserva. Um de nossos organizadores entrará em contato pelo WhatsApp para confirmar seus dados e passar as próximas orientações.";
    escolhidos.clear();
    document.getElementById("nome").value="";
@@ -130,7 +141,7 @@ botao.onclick=async()=>{
    document.getElementById("cpf").value="";
    atualizarResumo(); await carregar();
  } else {
-   msg.textContent="Um dos números acabou de ser reservado. Confira a grade e escolha novamente.";
+   msg.classList.remove("sucesso");msg.textContent="Um dos números acabou de ser reservado. Confira a grade e escolha novamente.";
    escolhidos.clear(); atualizarResumo(); await carregar();
  }
 }
