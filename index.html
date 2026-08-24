@@ -36,6 +36,18 @@ input,button{padding:12px;border-radius:8px;border:1px solid #bbb;font-size:15px
   border-radius:10px;
   line-height:1.5;
 }
+.aviso-contato{
+  max-width:900px;
+  margin:14px auto;
+  padding:14px;
+  background:#fff8e1;
+  color:#5c4500;
+  border:2px solid #e0b100;
+  border-radius:10px;
+  text-align:center;
+  font-weight:bold;
+  line-height:1.5;
+}
 @media(max-width:700px){
  .grid{grid-template-columns:repeat(5,1fr);gap:6px}
  .num{padding:10px 2px}
@@ -54,6 +66,11 @@ input,button{padding:12px;border-radius:8px;border:1px solid #bbb;font-size:15px
 <span><i class="dot" style="background:#fff"></i>Disponível</span>
 <span><i class="dot" style="background:#ffd966"></i>Reservado</span>
 <span><i class="dot" style="background:#7fcf82"></i>Confirmado</span>
+</div>
+<div class="aviso-contato">
+<strong>⚠️ ATENÇÃO AO CONTATO</strong><br>
+O único número responsável pelo contato referente à sua reserva é <strong>(14) 99162-0217</strong>.<br>
+Não aceite solicitações ou cobranças feitas por outros números. Caso receba contato diferente, desconsidere e confirme diretamente pelo número acima.
 </div>
 <div id="grid" class="grid">Carregando números...</div>
 </div>
@@ -134,7 +151,7 @@ botao.onclick=async()=>{
  if(error){console.error(error);msg.textContent="Não foi possível concluir. Tente novamente.";botao.disabled=false;return}
  if(data===true){
    msg.classList.add("sucesso");
-   msg.innerHTML="<strong>Reserva realizada com sucesso!</strong><br>Agradecemos sua reserva. Um de nossos organizadores entrará em contato pelo WhatsApp para confirmar seus dados e passar as próximas orientações.";
+   msg.innerHTML="<strong>Reserva realizada com sucesso!</strong><br>Agradecemos sua reserva. O contato será realizado exclusivamente pelo WhatsApp <strong>(14) 99162-0217</strong> para confirmar seus dados e passar as próximas orientações.<br><br>Caso as orientações não sejam concluídas dentro do prazo informado, o(s) número(s) poderá(ão) ser liberado(s) novamente.<br><br><strong>Importante:</strong> não aceite solicitações ou cobranças feitas por outros números.";
    escolhidos.clear();
    document.getElementById("nome").value="";
    document.getElementById("telefone").value="";
