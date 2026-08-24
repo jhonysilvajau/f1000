@@ -38,6 +38,7 @@ input,button{padding:12px;border-radius:8px;border:1px solid #bbb;font-size:15px
 <div class="wrap">
 <h1>Ford F-1000</h1>
 <div class="premio">Prêmio: 1 Caminhonete Ford F-1000</div>
+<div class="premio">Valor de referência do prêmio: R$ 55.000,00</div>
 <div class="preco">R$ 100,00 por número</div>
 <div class="legend">
 <span><i class="dot" style="background:#fff"></i>Disponível</span>
@@ -122,7 +123,7 @@ botao.onclick=async()=>{
  });
  if(error){console.error(error);msg.textContent="Não foi possível concluir. Tente novamente.";botao.disabled=false;return}
  if(data===true){
-   msg.textContent=`${lista.length} número${lista.length>1?"s":""} reservado${lista.length>1?"s":""} com sucesso!`;
+   msg.innerHTML="<strong>Reserva realizada com sucesso!</strong><br>Agradecemos sua reserva. Um de nossos organizadores entrará em contato pelo WhatsApp para confirmar seus dados e passar as próximas orientações.";
    escolhidos.clear();
    document.getElementById("nome").value="";
    document.getElementById("telefone").value="";
